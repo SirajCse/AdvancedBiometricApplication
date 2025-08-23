@@ -8,6 +8,10 @@ from pathlib import Path
 # Add the parent directory to Python path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+# CRITICAL: Add the src directory to Python path for PyInstaller ← THIS IS THE FIX!
+src_path = Path(__file__).parent
+sys.path.insert(0, str(src_path))
+
 from core.database import DatabaseManager
 from core.device_manager import DeviceManager
 from core.attendance_service import AttendanceService

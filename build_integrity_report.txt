@@ -1,9 +1,9 @@
 
 === INTEGRITY REPORT ===
 File: dist/AdvancedBiometricApplication.exe
-Size: 7537605 bytes
-SHA256: dbf329b5a74c9ae1eed5e1caeb47dde72ce3a92b2218360cb934c00ad1579f79
-Build Timestamp: 1755975272.5707304
+Size: 7567174 bytes
+SHA256: 3aa02b4cf5eba0403d6b168d70d0f0f339703419e15446abe887e2e2db37fa6a
+Build Timestamp: 1755977865.9303613
 
 SECURITY RECOMMENDATIONS:
 1. Store this hash securely for future integrity verification

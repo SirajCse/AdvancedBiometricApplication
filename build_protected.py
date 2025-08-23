@@ -74,6 +74,7 @@ def build_with_pyinstaller():
         raise ValueError("Encryption key must be at least 16 characters")
 
     # In the build_with_pyinstaller() function, ADD these hidden imports:
+
     pyinstaller_args = [
         "src/main.py",
         "--name=AdvancedBiometricApplication",
@@ -89,53 +90,14 @@ def build_with_pyinstaller():
         "--hidden-import=requests",
         "--hidden-import=urllib3",
         "--hidden-import=logging.handlers",
-    # === ADD THESE HIDDEN IMPORTS ===
-    "--hidden-import=core",
-    "--hidden-import=core.database",
-    "--hidden-import=core.device_manager",
-    "--hidden-import=core.attendance_service",
-    "--hidden-import=utils",
-    "--hidden-import=utils.logger",
-    "--hidden-import=utils.windows_utils",
-    "--hidden-import=utils.config_manager",
-    "--hidden-import=biometric",
-    "--hidden-import=biometric.zk_device",
-    "--hidden-import=biometric.zk_lib",
-    "--hidden-import=biometric.zk_lib.attendance",
-    "--hidden-import=biometric.zk_lib.base",
-    "--hidden-import=biometric.zk_lib.const",
-    "--hidden-import=biometric.zk_lib.exception",
-    "--hidden-import=biometric.zk_lib.finger",
-    "--hidden-import=biometric.zk_lib.user",
-    # ================================
-
         "--runtime-hook=custom_runtime.py",
+
+        # ADD THIS INSTEAD OF HIDDEN IMPORTS:
+        "--paths=.",  # Tell PyInstaller to look in current directory
+
         # Protection options
-        f"--key={encryption_key}",  # Use environment variable
-
-        # === ADD THESE HIDDEN IMPORTS ===
-        "--hidden-import=core",
-        "--hidden-import=core.database",
-        "--hidden-import=core.device_manager",
-        "--hidden-import=core.attendance_service",
-        "--hidden-import=utils",
-        "--hidden-import=utils.logger",
-        "--hidden-import=utils.windows_utils",
-        "--hidden-import=utils.config_manager",
-        "--hidden-import=biometric",
-        "--hidden-import=biometric.zk_device",
-        "--hidden-import=biometric.zk_lib",
-        "--hidden-import=biometric.zk_lib.attendance",
-        "--hidden-import=biometric.zk_lib.base",
-        "--hidden-import=biometric.zk_lib.const",
-        "--hidden-import=biometric.zk_lib.exception",
-        "--hidden-import=biometric.zk_lib.finger",
-        "--hidden-import=biometric.zk_lib.user",
-        # ================================
-
-        "--upx-dir=.",  # Use UPX if available
-        "--strip",  # Strip symbols
-        "--noupx",  # Don't use UPX (can be detected as malware)
+        f"--key={encryption_key}",
+        "--noupx",  # Keep this
     ]
 
     try:

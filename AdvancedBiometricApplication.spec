@@ -1,14 +1,14 @@
 # -*- mode: python ; coding: utf-8 -*-
 
 
-block_cipher = None
+block_cipher = pyi_crypto.PyiBlockCipher(key='QWERTYUIOP12345678')
 
 
 a = Analysis(
     ['src\\main.py'],
-    pathex=[],
+    pathex=['.'],
     binaries=[],
-    datas=[('config', 'config'), ('data', 'data'), ('scripts', 'scripts')],
+    datas=[('config', 'config'), ('data', 'data'), ('scripts', 'scripts'), ('logs', 'logs')],
     hiddenimports=['sqlite3', 'requests', 'urllib3', 'logging.handlers'],
     hookspath=[],
     hooksconfig={},
