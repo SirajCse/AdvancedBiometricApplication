@@ -8,24 +8,23 @@ import getpass
 from pathlib import Path
 import PyInstaller.__main__
 
+# REPLACE the hardcoded key with environment variable
 def get_secure_encryption_key():
-    """
-    Securely retrieve encryption key from environment variable or prompt user
-    Never hardcode encryption keys in source code
-    """
-    # First try to get from environment variable
+    """Securely retrieve encryption key from environment variable"""
     key = os.environ.get('APP_ENCRYPTION_KEY')
-
     if not key:
-        # If not in environment, prompt user securely
-        print("Encryption key not found in environment variables.")
-        print("Please enter your encryption key (min 16 characters):")
-        key = getpass.getpass("Encryption Key: ")
-
+        raise ValueError("APP_ENCRYPTION_KEY environment variable not set")
     if len(key) < 16:
         raise ValueError("Encryption key must be at least 16 characters")
-
     return key
+
+# THEN in build_with_pyinstaller():
+encryption_key = get_secure_encryption_key()
+pyinstaller_args = [
+    # ... other args ...
+    f"--key={encryption_key}",  # ✅ Use secure key
+    # ... other args ...
+]
 
 def calculate_file_hash(file_path):
     """Calculate SHA256 hash of a file for integrity verification"""

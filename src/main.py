@@ -32,15 +32,22 @@ def main():
     # ===== CONFIGURATION LOADING =====
     # Load configuration
     config_manager = ConfigManager()
-
-    # Use custom config file if specified, otherwise default
     config_file = args.config if args.config else "default_config.json"
     config = config_manager.load_config(config_file)
 
     # Validate configuration
     if not config_manager.validate_config(config):
-        print("Configuration validation failed! Please check your config file.")
+        logger.error("Configuration validation failed!")
         sys.exit(1)
+
+    # Use config for logging setup
+    log_config = config.get('logging', {})
+    setup_logging(
+        log_file=log_config.get('file', 'logs/app.log'),
+        level=log_config.get('level', 'INFO'),
+        max_bytes=log_config.get('max_size_mb', 10) * 1024 * 1024,
+        backup_count=log_config.get('backup_count', 5)
+    )
 
     # Set encryption key from environment if available
     encryption_key = os.environ.get('CONFIG_ENCRYPTION_KEY')

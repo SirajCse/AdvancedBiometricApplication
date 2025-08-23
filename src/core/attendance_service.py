@@ -12,13 +12,13 @@ from .device_manager import DeviceManager
 logger = logging.getLogger(__name__)
 
 class AttendanceService:
-    def __init__(self, db_manager: DatabaseManager, device_manager: DeviceManager, config: Dict = None):
+    def __init__(self, db_manager, device_manager, config=None):
         self.db = db_manager
         self.device_manager = device_manager
         self.config = config or {}
         self.is_running = False
         self.sync_thread = None
-        self.sync_interval = int(self.config.get('sync', {}).get('interval_seconds', 300))
+        self.sync_interval = self.config.get('sync', {}).get('interval_seconds', 300)
         
     def start(self, sync_config: Dict = None):
         """Start the attendance synchronization service"""

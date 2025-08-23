@@ -22,8 +22,8 @@ class DeviceManager:
         self.live_capture_threads = {}
 
     # Update initialize_devices method:
-    def initialize_devices(self, devices_config: List[Dict] = None):
-        """Initialize all configured devices using ZK library"""
+    def initialize_devices(self, devices_config=None):
+        """Initialize devices from configuration"""
         if devices_config is None:
             devices_config = self.config.get('devices', [])
 
