@@ -1,9 +1,8 @@
-# setup.py
-from cx_Freeze import setup, Executable
-import sys
+# setup.py - Secure PyInstaller Build Configuration
 import os
-import PyInstaller
+import sys
 import subprocess
+import hashlib
 from pathlib import Path
 
 # Application information
@@ -13,179 +12,198 @@ APP_DESCRIPTION = "Biometric attendance system"
 APP_AUTHOR = "Advanced Biometric"
 APP_AUTHOR_EMAIL = "info@bitdreamit.com"
 
-# Build options for cx_Freeze
-build_exe_options = {
-    "packages": [
-        "os", "sys", "sqlite3", "datetime", "json", "logging", 
-        "threading", "queue", "time", "socket", "winreg", "subprocess",
-        "pathlib", "argparse", "struct", "requests", "urllib3"
-    ],
-    "include_files": [
-        ("config/", "config/"),
-        ("data/", "data/"),
-        ("logs/", "logs/"),
-        ("scripts/", "scripts/"),
-    ],
-    "excludes": ["tkinter", "test", "unittest", "email"],
-    "optimize": 2,
-    "include_msvcr": True,
-    # Obfuscation and protection settings
-    "replace_paths": [("*", "")],  # Remove path information
-    "silent": True,  # Reduce build output
-}
+def get_secure_key():
+    """
+    Securely retrieve encryption key from environment variable
+    Never hardcode encryption keys in source code
+    """
+    key = os.environ.get('APP_ENCRYPTION_KEY')
+    if not key:
+        print("ERROR: APP_ENCRYPTION_KEY environment variable not set")
+        print("Please set this variable with a secure encryption key")
+        sys.exit(1)
 
-# Executable configuration
-executables = [
-    Executable(
-        "src/main.py",
-        base="Win32GUI" if sys.platform == "win32" else None,
-        target_name="AdvancedBiometricApplication.exe",
-        icon=None,
-    )
-]
+    if len(key) < 16:
+        print("ERROR: Encryption key must be at least 16 characters")
+        sys.exit(1)
 
-setup(
-    name=APP_NAME,
-    version=APP_VERSION,
-    description=APP_DESCRIPTION,
-    author=APP_AUTHOR,
-    author_email=APP_AUTHOR_EMAIL,
-    options={"build_exe": build_exe_options},
-    executables=executables,
-)
+    return key
 
-# Additional protection steps
-def apply_code_protection():
-    """Apply additional code protection measures"""
-    print("Applying code protection measures...")
-    
-    # 1. Create a dedicated build script for PyInstaller (better protection)
-    create_pyinstaller_script()
-    
-    # 2. Obfuscate the source code before building
-    obfuscate_code()
-    
-    # 3. Create a custom runtime for additional protection
-    create_custom_runtime()
-    
-    print("Code protection measures applied successfully!")
+def calculate_file_hash(file_path):
+    """Calculate SHA256 hash of a file for integrity verification"""
+    hasher = hashlib.sha256()
+    with open(file_path, 'rb') as f:
+        while chunk := f.read(4096):
+            hasher.update(chunk)
+    return hasher.hexdigest()
 
-def create_pyinstaller_script():
-    """Create a PyInstaller build script for better protection"""
-    pyinstaller_script = """
-# PyInstaller build script with enhanced protection
-import PyInstaller.__main__
-import os
+def create_integrity_verifier(executable_path):
+    """
+    Create an integrity verification script that checks the executable hash
+    against an expected value stored separately
+    """
+    # Calculate hash of the built executable
+    actual_hash = calculate_file_hash(executable_path)
 
-PyInstaller.__main__.run([
-    'src/main.py',
-    '--name=AdvancedBiometricApplication',
-    '--onefile',
-    '--windowed',
-    '--icon=NONE',
-    '--add-data=config;config',
-    '--add-data=data;data',
-    '--add-data=scripts;scripts',
-    '--hidden-import=sqlite3',
-    '--hidden-import=requests',
-    '--hidden-import=urllib3',
-    '--hidden-import=logging',
-    '--clean',
-    '--noconfirm',
-    # Protection options
-    '--key=YourEncryptionKey123!',  # Encryption key for bytecode
-    '--upx-dir=upx',  # Use UPX compression
-])
-"""
-    with open('build_pyinstaller.py', 'w') as f:
-        f.write(pyinstaller_script)
-
-def obfuscate_code():
-    """Obfuscate Python code before building"""
-    print("Obfuscating source code...")
-    
-    # This is a simple obfuscation example
-    # For production, use professional obfuscation tools like PyArmor
-    
-    obfuscation_script = """
-# Basic code obfuscation script
-import os
-import base64
-import zlib
-from pathlib import Path
-
-def simple_obfuscate(file_path):
-    \"\"\"Simple code obfuscation\"\"\"
-    try:
-        with open(file_path, 'r', encoding='utf-8') as f:
-            content = f.read()
-        
-        # Simple transformation (not secure, just example)
-        obfuscated = base64.b64encode(zlib.compress(content.encode('utf-8')))
-        
-        # Create obfuscated version
-        obfuscated_path = file_path + '.obfuscated'
-        with open(obfuscated_path, 'wb') as f:
-            f.write(b'# Obfuscated code\\n')
-            f.write(b'import base64,zlib\\n')
-            f.write(b'exec(zlib.decompress(base64.b64decode("\\n')
-            f.write(obfuscated)
-            f.write(b'")))\\n')
-            
-    except Exception as e:
-        print(f"Error obfuscating {file_path}: {e}")
-
-# Obfuscate main files
-for py_file in Path('src').rglob('*.py'):
-    if py_file.name != '__init__.py':
-        simple_obfuscate(str(py_file))
-"""
-    
-    with open('obfuscate_code.py', 'w') as f:
-        f.write(obfuscation_script)
-    
-    # Run obfuscation
-    try:
-        subprocess.run([sys.executable, 'obfuscate_code.py'], check=True)
-    except:
-        print("Obfuscation skipped or failed")
-
-def create_custom_runtime():
-    """Create custom runtime hooks for additional protection"""
-    runtime_hook = """
-# Custom runtime hook for additional protection
+    # Create a separate verification file (would be stored securely in production)
+    verifier_content = f'''#!/usr/bin/env python3
+# Integrity verification module
 import sys
 import os
 import hashlib
 
-def verify_integrity():
-    \"\"\"Verify application integrity\"\"\"
-    expected_hash = "your_expected_hash_here"
-    current_file = sys.argv[0]
-    
-    with open(current_file, 'rb') as f:
-        file_hash = hashlib.sha256(f.read()).hexdigest()
-    
-    if file_hash != expected_hash:
-        print("Integrity check failed! Application may be tampered with.")
-        sys.exit(1)
+EXPECTED_HASH = "{actual_hash}"
 
-def anti_debug():
-    \"\"\"Basic anti-debugging measures\"\"\"
+def verify_application_integrity():
+    """Verify the application executable hasn't been modified"""
+    app_path = sys.executable if getattr(sys, 'frozen', False) else sys.argv[0]
+
     try:
-        if hasattr(sys, 'gettrace') and sys.gettrace() is not None:
-            print("Debugger detected! Exiting.")
-            sys.exit(1)
-    except:
-        pass
+        # Calculate current hash
+        hasher = hashlib.sha256()
+        with open(app_path, 'rb') as f:
+            while chunk := f.read(4096):
+                hasher.update(chunk)
+        current_hash = hasher.hexdigest()
 
-# Run protection measures
-anti_debug()
-# verify_integrity()  # Enable after setting proper hash
-"""
-    
-    with open('custom_runtime.py', 'w') as f:
-        f.write(runtime_hook)
+        return current_hash == EXPECTED_HASH
+    except Exception as e:
+        print(f"Integrity check error: {{e}}")
+        return False
 
 if __name__ == "__main__":
-    apply_code_protection()
+    if verify_application_integrity():
+        print("Integrity check passed")
+        sys.exit(0)
+    else:
+        print("WARNING: Application integrity check failed!")
+        print("The application may have been tampered with.")
+        sys.exit(1)
+'''
+
+    # Write verifier to a file
+    verifier_path = Path("integrity_verifier.py")
+    with open(verifier_path, 'w') as f:
+        f.write(verifier_content)
+
+    print(f"Integrity verifier created with hash: {actual_hash}")
+    return actual_hash
+
+def build_with_pyinstaller():
+    """Build the application using PyInstaller with security enhancements"""
+    print("Building with PyInstaller...")
+
+    # Get encryption key securely
+    encryption_key = get_secure_key()
+
+    # PyInstaller configuration
+    pyinstaller_args = [
+        "src/main.py",
+        "--name", APP_NAME,
+        "--onefile",
+        "--windowed",
+        "--clean",
+        "--noconfirm",
+        "--add-data", "config;config",
+        "--add-data", "data;data",
+        "--add-data", "scripts;scripts",
+        "--hidden-import", "sqlite3",
+        "--hidden-import", "requests",
+        "--hidden-import", "urllib3",
+        "--hidden-import", "logging.handlers",
+        # Security options
+        "--key", encryption_key,  # Bytecode encryption
+        "--noupx",  # Avoid UPX which can trigger antivirus false positives
+    ]
+
+    try:
+        # Import PyInstaller here to avoid dependency issues
+        import PyInstaller.__main__
+        PyInstaller.__main__.run(pyinstaller_args)
+
+        # Path to the built executable
+        executable_path = f"dist/{APP_NAME}.exe"
+
+        if os.path.exists(executable_path):
+            # Create integrity verification
+            create_integrity_verifier(executable_path)
+            print(f"Build completed successfully: {executable_path}")
+            return True
+        else:
+            print("Build failed: Executable not found")
+            return False
+
+    except ImportError:
+        print("PyInstaller not installed. Installing...")
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "pyinstaller"])
+
+        # Try again after installation
+        import PyInstaller.__main__
+        PyInstaller.__main__.run(pyinstaller_args)
+        return True
+
+    except Exception as e:
+        print(f"PyInstaller build failed: {e}")
+        return False
+
+def apply_security_measures():
+    """Apply additional security measures to the built executable"""
+    executable_path = f"dist/{APP_NAME}.exe"
+
+    if not os.path.exists(executable_path):
+        print("Executable not found for security hardening")
+        return False
+
+    print("Applying additional security measures...")
+
+    try:
+        # Set restrictive file permissions (Windows)
+        if os.name == 'nt':
+            subprocess.run([
+                'icacls', executable_path,
+                '/inheritance:r',
+                '/grant:r', 'Administrators:(F)',
+                '/grant:r', 'SYSTEM:(F)',
+                '/grant:r', 'Users:(RX)'
+            ], check=True, capture_output=True)
+
+        print("Security measures applied successfully")
+        return True
+
+    except subprocess.CalledProcessError as e:
+        print(f"Warning: Could not set file permissions: {e}")
+        return False
+
+def main():
+    """Main build function"""
+    print("=" * 60)
+    print(f"Building {APP_NAME} v{APP_VERSION}")
+    print("=" * 60)
+
+    # Create necessary directories
+    Path("dist").mkdir(exist_ok=True)
+    Path("build").mkdir(exist_ok=True)
+
+    # Build with PyInstaller
+    success = build_with_pyinstaller()
+
+    if success:
+        # Apply additional security measures
+        apply_security_measures()
+
+        print("\nBuild completed successfully!")
+        print("Security features applied:")
+        print("- Bytecode encryption with environment-based key")
+        print("- Integrity verification system")
+        print("- Restricted file permissions")
+        print("- No external packers (reduces AV false positives)")
+
+        print(f"\nExecutable available in: dist/{APP_NAME}.exe")
+        print("\nImportant: Store the integrity hash securely for production use!")
+
+    else:
+        print("Build failed!")
+        sys.exit(1)
+
+if __name__ == "__main__":
+    main()
