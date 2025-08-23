@@ -11,10 +11,9 @@ from src.core.database import DatabaseManager
 logger = logging.getLogger(__name__)
 
 class DeviceManager:
-
     def __init__(self, db_manager: DatabaseManager, config: Dict = None):
         self.db = db_manager
-        self.config = config or {}
+        self.config = config or {}  # Add config parameter
         self.devices: Dict[str, ZKDevice] = {}
         self.attendance_queue = Queue()
         self.is_running = False

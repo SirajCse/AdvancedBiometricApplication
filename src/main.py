@@ -13,7 +13,7 @@ from core.device_manager import DeviceManager
 from core.attendance_service import AttendanceService
 from utils.logger import setup_logging
 from utils.windows_utils import WindowsStartupManager
-from utils.config_manager import ConfigManager  # Add this import
+from utils.config_manager import ConfigManager
 
 APP_NAME = "Advanced Biometric Application"
 APP_VERSION = "2.0"
@@ -37,9 +37,12 @@ def main():
     config_file = args.config if args.config else "default_config.json"
     config = config_manager.load_config(config_file)
 
-    # Validate configuration
+    # Validate configuration - with basic logging for errors
     if not config_manager.validate_config(config):
-        print("Configuration validation failed! Please check your config file.")
+        # Setup minimal logging for error message
+        setup_logging('logs/app.log', 'ERROR')
+        logger = logging.getLogger(__name__)
+        logger.error("Configuration validation failed! Please check your config file.")
         sys.exit(1)
 
     # Set encryption key from environment if available
@@ -52,7 +55,7 @@ def main():
     log_dir = Path("logs")
     log_dir.mkdir(exist_ok=True)
 
-    # Use config for logging setup - CORRECTED VERSION
+    # Use config for logging setup
     log_config = config.get('logging', {})
     setup_logging(
         log_file=log_config.get('file', 'logs/app.log'),
