@@ -1,0 +1,37 @@
+{
+  "database": {
+    "path": "data/att.db",
+    "auto_create": true
+  },
+  "logging": {
+    "level": "INFO",
+    "file": "logs/app.log",
+    "max_size_mb": 10,
+    "backup_count": 5
+  },
+  "sync": {
+    "interval_seconds": 300,
+    "retry_attempts": 3,
+    "retry_delay_seconds": 60
+  },
+  "devices": [
+    {
+      "ip": "192.168.1.201",
+      "port": 4370,
+      "serial_number": "DEVICE_SERIAL_NUMBER",
+      "name": "Main Entrance Device",
+      "enabled": true
+    }
+  ],
+  "server": {
+    "url": "https://your-academy.example.com/",
+    "api_key": "your_api_key_here",
+    "sync_enabled": true
+  },
+  "application": {
+    "auto_start": false,
+    "minimize_to_tray": true,
+    "check_for_updates": true,
+    "auto_connect_devices": true
+  }
+}

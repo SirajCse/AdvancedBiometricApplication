@@ -1,0 +1,127 @@
+
+#Version 3
+
+AdvancedBiometricApplication/
+├── install.bat
+├── setup.py
+├── requirements.txt
+├── README.md
+├── src/
+│   ├── main.py
+│   ├── biometric/
+│   │   ├── zk_device.py
+│   │   └── zk_lib/
+│   │       ├── attendance.py
+│   │       ├── base.py
+│   │       ├── const.py
+│   │       ├── exception.py
+│   │       ├── finger.py
+│   │       ├── user.py
+│   │       └── __init__.py
+│   ├── core/
+│   │   ├── database.py
+│   │   ├── device_manager.py
+│   │   ├── attendance_service.py
+│   │   └── __init__.py
+│   └── utils/
+│       ├── windows_utils.py
+│       ├── logger.py
+│       ├── config_manager.py
+│       └── __init__.py
+├── config/
+│   ├── default_config.json
+│   └── app_config.ini
+├── data/
+│   └── att.db (will be created automatically)
+├── logs/
+│   └── app.log (will be created automatically)
+└── scripts/
+    ├── install_service.bat
+    ├── uninstall_service.bat
+    └── run_app.bat
+
+=============================================================
+
+#Version 2
+AdvancedBiometricApplication/
+├── src/
+│   ├── biometric/
+│   │   ├── __init__.py
+│   │   ├── zk_device.py          # Main device interface
+│   │   └── zk_lib/               # ZK library files
+│   │       ├── __init__.py
+│   │       ├── base.py           # Main ZK class (will create)
+│   │       ├── attendance.py
+│   │       ├── const.py
+│   │       ├── exception.py
+│   │       ├── finger.py
+│   │       └── user.py
+│   ├── core/
+│   │   ├── __init__.py
+│   │   ├── database.py
+│   │   ├── device_manager.py
+│   │   └── attendance_service.py
+│   ├── utils/
+│   │   ├── __init__.py
+│   │   ├── config_manager.py
+│   │   ├── logger.py
+│   │   └── windows_utils.py
+│   ├── gui/
+│   │   ├── __init__.py
+│   │   ├── main_window.py
+│   │   └── settings_dialog.py
+│   └── main.py
+├── config/
+│   ├── default_config.json
+│   └── app_config.ini
+├── data/
+│   └── att.db
+├── install/
+│   ├── create_installer.py
+│   └── setup.iss
+├── scripts/
+│   ├── install_service.bat
+│   ├── uninstall_service.bat
+│   └── run_app.bat
+├── requirements.txt
+├── setup.py
+├── config_util.py
+└── README.md
+=====================================================
+#Version 1
+AdvancedBiometricApplication/
+├── src/
+│   ├── core/
+│   │   ├── __init__.py
+│   │   ├── database.py
+│   │   ├── device_manager.py
+│   │   └── attendance_service.py
+│   ├── biometric/
+│   │   ├── __init__.py
+│   │   └── zk_device.py
+│   ├── utils/
+│   │   ├── __init__.py
+│   │   ├── config_manager.py
+│   │   ├── logger.py
+│   │   └── windows_utils.py
+│   ├── gui/
+│   │   ├── __init__.py
+│   │   ├── main_window.py
+│   │   └── settings_dialog.py
+│   └── main.py
+├── config/
+│   ├── default_config.json
+│   └── app_config.ini
+├── data/
+│   └── att.db
+├── install/
+│   ├── create_installer.py
+│   └── setup.iss
+├── scripts/
+│   ├── install_service.bat
+│   ├── uninstall_service.bat
+│   └── run_app.bat
+├── requirements.txt
+├── setup.py
+├── config_util.py
+└── README.md
