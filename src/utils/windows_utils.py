@@ -1,136 +1,68 @@
-# src/utils/windows_utils.py
+# src/utils/windows_utils.py (Enhanced)
 import os
 import sys
 import winreg
 import logging
 import subprocess
 from pathlib import Path
+import hashlib
 
 logger = logging.getLogger(__name__)
 
 class WindowsStartupManager:
+    # ... (previous code remains the same) ...
+
     @staticmethod
-    def enable_auto_start(app_name: str, app_path: str) -> bool:
-        """Add application to Windows startup"""
+    def protect_executable(exe_path: str):
+        """Apply protection measures to executable"""
         try:
-            # Get the path to the current executable
-            if getattr(sys, 'frozen', False):
-                # Running as compiled executable
-                executable_path = sys.executable
-            else:
-                # Running as Python script
-                executable_path = os.path.abspath(app_path)
-            
-            # Add to registry startup
-            key = winreg.OpenKey(
-                winreg.HKEY_CURRENT_USER,
-                r"Software\Microsoft\Windows\CurrentVersion\Run",
-                0, winreg.KEY_SET_VALUE
-            )
-            
-            winreg.SetValueEx(key, app_name, 0, winreg.REG_SZ, f'"{executable_path}" --minimized')
-            winreg.CloseKey(key)
-            
-            logger.info(f"Added {app_name} to Windows startup")
-            return True
-        except Exception as e:
-            logger.error(f"Failed to add to startup: {e}")
-            return False
-    
-    @staticmethod
-    def disable_auto_start(app_name: str) -> bool:
-        """Remove application from Windows startup"""
-        try:
-            key = winreg.OpenKey(
-                winreg.HKEY_CURRENT_USER,
-                r"Software\Microsoft\Windows\CurrentVersion\Run",
-                0, winreg.KEY_SET_VALUE
-            )
-            
-            winreg.DeleteValue(key, app_name)
-            winreg.CloseKey(key)
-            
-            logger.info(f"Removed {app_name} from Windows startup")
-            return True
-        except FileNotFoundError:
-            # Key doesn't exist, which means it's already removed
-            return True
-        except Exception as e:
-            logger.error(f"Failed to remove from startup: {e}")
-            return False
-    
-    @staticmethod
-    def is_auto_start_enabled(app_name: str) -> bool:
-        """Check if application is in Windows startup"""
-        try:
-            key = winreg.OpenKey(
-                winreg.HKEY_CURRENT_USER,
-                r"Software\Microsoft\Windows\CurrentVersion\Run",
-                0, winreg.KEY_READ
-            )
-            
-            value, _ = winreg.QueryValueEx(key, app_name)
-            winreg.CloseKey(key)
-            
-            return value is not None
-        except FileNotFoundError:
-            return False
-        except Exception:
-            return False
-    
-    @staticmethod
-    def install_windows_service(service_name: str, display_name: str, app_path: str) -> bool:
-        """Install as Windows service (requires admin privileges)"""
-        try:
-            # Use nssm (Non-Sucking Service Manager) for service installation
-            nssm_path = Path(__file__).parent.parent / "bin" / "nssm.exe"
-            
-            if not nssm_path.exists():
-                logger.error("NSSM not found. Service installation requires nssm.exe")
-                return False
-            
-            # Install the service
-            result = subprocess.run([
-                str(nssm_path), "install", service_name, app_path
-            ], capture_output=True, text=True)
-            
-            if result.returncode == 0:
-                # Set display name
+            # 1. Set file permissions to restrict access
+            subprocess.run([
+                'icacls', exe_path,
+                '/inheritance:r',
+                '/grant:r', 'Administrators:(F)',
+                '/grant:r', 'SYSTEM:(F)',
+                '/grant:r', 'Users:(RX)'
+            ], check=True)
+
+            # 2. Mark as critical system file (Windows only)
+            try:
                 subprocess.run([
-                    str(nssm_path), "set", service_name, "DisplayName", display_name
-                ], capture_output=True)
-                
-                logger.info(f"Installed Windows service: {service_name}")
-                return True
-            else:
-                logger.error(f"Failed to install service: {result.stderr}")
-                return False
-                
+                    'attrib', '+S', '+H', '+R', exe_path
+                ], check=True)
+            except:
+                pass  # This might not work on all systems
+
+            logger.info(f"Applied protection to {exe_path}")
+            return True
+
         except Exception as e:
-            logger.error(f"Service installation error: {e}")
+            logger.error(f"Failed to protect executable: {e}")
             return False
-    
+
     @staticmethod
-    def uninstall_windows_service(service_name: str) -> bool:
-        """Uninstall Windows service"""
+    def verify_executable_integrity(exe_path: str) -> bool:
+        """Verify executable hasn't been tampered with"""
         try:
-            nssm_path = Path(__file__).parent.parent / "bin" / "nssm.exe"
-            
-            if not nssm_path.exists():
-                logger.error("NSSM not found. Service uninstallation requires nssm.exe")
+            # Calculate current hash
+            with open(exe_path, 'rb') as f:
+                current_hash = hashlib.sha256(f.read()).hexdigest()
+
+            # Compare with expected hash (would be stored securely)
+            expected_hash = WindowsStartupManager.get_expected_hash()
+
+            if expected_hash and current_hash != expected_hash:
+                logger.warning("Executable integrity check failed!")
                 return False
-            
-            result = subprocess.run([
-                str(nssm_path), "remove", service_name, "confirm"
-            ], capture_output=True, text=True)
-            
-            if result.returncode == 0:
-                logger.info(f"Uninstalled Windows service: {service_name}")
-                return True
-            else:
-                logger.error(f"Failed to uninstall service: {result.stderr}")
-                return False
-                
+
+            return True
+
         except Exception as e:
-            logger.error(f"Service uninstallation error: {e}")
+            logger.error(f"Integrity check failed: {e}")
             return False
+
+    @staticmethod
+    def get_expected_hash():
+        """Get expected hash (in real implementation, store this securely)"""
+        # In production, this should be stored encrypted or in a secure location
+        return None  # Replace with actual hash

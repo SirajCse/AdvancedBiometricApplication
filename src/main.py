@@ -5,8 +5,8 @@ import logging
 import argparse
 from pathlib import Path
 
-# Add src to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__)))
+# Add the parent directory to Python path
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from core.database import DatabaseManager
 from core.device_manager import DeviceManager
@@ -20,7 +20,7 @@ APP_VERSION = "2.0"
 def main():
     # Parse command line arguments
     parser = argparse.ArgumentParser(description=APP_NAME)
-    parser.add_argument('--minimized', action='store_true', help='Start minimized to system tray')
+    parser.add_argument('--minimized', action='store_true', help='Start minimized')
     parser.add_argument('--install-service', action='store_true', help='Install as Windows service')
     parser.add_argument('--uninstall-service', action='store_true', help='Uninstall Windows service')
     parser.add_argument('--enable-autostart', action='store_true', help='Enable auto-start with Windows')
@@ -40,22 +40,22 @@ def main():
     if args.install_service:
         app_path = sys.executable if getattr(sys, 'frozen', False) else __file__
         success = WindowsStartupManager.install_windows_service(
-            "AdvancedBiometric", APP_NAME, app_path
+            "AdvancedBiometricApp", APP_NAME, app_path
         )
         sys.exit(0 if success else 1)
 
     if args.uninstall_service:
-        success = WindowsStartupManager.uninstall_windows_service("AdvancedBiometric")
+        success = WindowsStartupManager.uninstall_windows_service("AdvancedBiometricApp")
         sys.exit(0 if success else 1)
 
     # Handle auto-start commands
     if args.enable_autostart:
         app_path = sys.executable if getattr(sys, 'frozen', False) else __file__
-        success = WindowsStartupManager.enable_auto_start("AdvancedBiometric", app_path)
+        success = WindowsStartupManager.enable_auto_start("AdvancedBiometricApp", app_path)
         sys.exit(0 if success else 1)
 
     if args.disable_autostart:
-        success = WindowsStartupManager.disable_auto_start("AdvancedBiometric")
+        success = WindowsStartupManager.disable_auto_start("AdvancedBiometricApp")
         sys.exit(0 if success else 1)
 
     # Initialize database
@@ -78,6 +78,7 @@ def main():
         logger.info("All services started successfully")
 
         # Keep the main thread alive
+        import time
         while True:
             time.sleep(1)
 

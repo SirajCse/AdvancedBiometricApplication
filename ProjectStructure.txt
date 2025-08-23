@@ -1,4 +1,65 @@
 
+#Version 4
+Folder PATH listing for volume SOFTWARE
+Volume serial number is FE06-DD3B
+D:.
+¦   structure.txt
+¦
++---AdvancedBiometricApplication
+    ¦   .gitattributes
+    ¦   build_protected.py
+    ¦   check_structure.py
+    ¦   install.bat
+    ¦   install_protected.bat
+    ¦   ProjectStructure.txt
+    ¦   protect_with_pyarmor.py
+    ¦   README.md
+    ¦   requirements.txt
+    ¦   setup.py
+    ¦
+    +---scripts
+    ¦       install_service.bat
+    ¦       run_app.bat
+    ¦       uninstall_service.bat
+    ¦
+    +---src
+        ¦   main.py
+        ¦   __init__.py
+        ¦
+        +---biometric
+        ¦   ¦   zk_device.py
+        ¦   ¦   __init__.py
+        ¦   ¦
+        ¦   +---zk_lib
+        ¦           attendance.py
+        ¦           base.py
+        ¦           const.py
+        ¦           exception.py
+        ¦           finger.py
+        ¦           user.py
+        ¦           __init__.py
+        ¦
+        +---config
+        ¦       app_config.ini
+        ¦       default_config.json
+        ¦       __init__.py
+        ¦
+        +---core
+        ¦       attendance_service.py
+        ¦       database.py
+        ¦       device_manager.py
+        ¦       __init__.py
+        ¦
+        +---data
+        +---logs
+        +---utils
+                config_manager.py
+                logger.py
+                windows_utils.py
+                __init__.py
+
+
+===============================================
 #Version 3
 
 AdvancedBiometricApplication/
