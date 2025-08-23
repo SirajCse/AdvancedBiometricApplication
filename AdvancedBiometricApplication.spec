@@ -6,9 +6,9 @@ block_cipher = pyi_crypto.PyiBlockCipher(key='QWERTYUIOP12345678')
 
 a = Analysis(
     ['src\\main.py'],
-    pathex=['.'],
+    pathex=['src', 'src/core', 'src/utils', 'src/biometric'],
     binaries=[],
-    datas=[('config', 'config'), ('data', 'data'), ('scripts', 'scripts'), ('logs', 'logs')],
+    datas=[('config', 'config'), ('data', 'data'), ('scripts', 'scripts')],
     hiddenimports=['sqlite3', 'requests', 'urllib3', 'logging.handlers'],
     hookspath=[],
     hooksconfig={},

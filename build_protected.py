@@ -75,6 +75,7 @@ def build_with_pyinstaller():
 
     # In the build_with_pyinstaller() function, ADD these hidden imports:
 
+    # In build_protected.py, add these PATHS instead of hidden imports:
     pyinstaller_args = [
         "src/main.py",
         "--name=AdvancedBiometricApplication",
@@ -85,19 +86,20 @@ def build_with_pyinstaller():
         "--add-data=config;config",
         "--add-data=data;data",
         "--add-data=scripts;scripts",
-        "--add-data=logs;logs",
         "--hidden-import=sqlite3",
         "--hidden-import=requests",
         "--hidden-import=urllib3",
         "--hidden-import=logging.handlers",
         "--runtime-hook=custom_runtime.py",
 
-        # ADD THIS INSTEAD OF HIDDEN IMPORTS:
-        "--paths=.",  # Tell PyInstaller to look in current directory
+        # CRITICAL: ADD THESE PATHS
+        "--paths=src",      # Look in src directory
+        "--paths=src/core", # Look in core specifically
+        "--paths=src/utils", # Look in utils specifically
+        "--paths=src/biometric", # Look in biometric specifically
 
-        # Protection options
         f"--key={encryption_key}",
-        "--noupx",  # Keep this
+        "--noupx",
     ]
 
     try:
