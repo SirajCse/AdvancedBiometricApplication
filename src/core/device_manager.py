@@ -11,36 +11,43 @@ from src.core.database import DatabaseManager
 logger = logging.getLogger(__name__)
 
 class DeviceManager:
-    def __init__(self, db_manager: DatabaseManager):
+
+    def __init__(self, db_manager: DatabaseManager, config: Dict = None):
         self.db = db_manager
+        self.config = config or {}
         self.devices: Dict[str, ZKDevice] = {}
         self.attendance_queue = Queue()
         self.is_running = False
         self.thread = None
         self.live_capture_threads = {}
 
-    def initialize_devices(self):
+    # Update initialize_devices method:
+    def initialize_devices(self, devices_config: List[Dict] = None):
         """Initialize all configured devices using ZK library"""
-        devices = self.db.get_devices()
-        for device_info in devices:
+        if devices_config is None:
+            devices_config = self.config.get('devices', [])
+
+        for device_info in devices_config:
             try:
                 device = ZKDevice(
                     ip=device_info['ip'],
-                    port=device_info['port'],
-                    serial_number=device_info['serial_number']
+                    port=device_info.get('port', 4370),
+                    serial_number=device_info.get('serial_number'),
+                    timeout=device_info.get('timeout', 30)
                 )
                 if device.connect():
-                    self.devices[device_info['serial_number']] = device
-                    logger.info(f"Connected to device {device_info['serial_number']} at {device_info['ip']}")
+                    self.devices[device_info.get('serial_number', device_info['ip'])] = device
+                    logger.info(f"Connected to device {device_info.get('serial_number', device_info['ip'])} at {device_info['ip']}")
 
-                    # Sync device time
-                    if device.sync_time():
-                        logger.info(f"Synchronized time with device {device_info['serial_number']}")
+                    # Sync device time if enabled
+                    if device_info.get('sync_time', True):
+                        if device.sync_time():
+                            logger.info(f"Synchronized time with device {device_info.get('serial_number', device_info['ip'])}")
 
                 else:
-                    logger.error(f"Failed to connect to device {device_info['serial_number']}")
+                    logger.error(f"Failed to connect to device {device_info.get('serial_number', device_info['ip'])}")
             except Exception as e:
-                logger.error(f"Error initializing device {device_info['serial_number']}: {e}")
+                logger.error(f"Error initializing device {device_info.get('serial_number', device_info['ip'])}: {e}")
 
     def start_live_capture(self):
         """Start live capture on all devices"""

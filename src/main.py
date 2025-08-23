@@ -13,6 +13,7 @@ from core.device_manager import DeviceManager
 from core.attendance_service import AttendanceService
 from utils.logger import setup_logging
 from utils.windows_utils import WindowsStartupManager
+from utils.config_manager import ConfigManager  # Add this import
 
 APP_NAME = "Advanced Biometric Application"
 APP_VERSION = "2.0"
@@ -28,13 +29,41 @@ def main():
     parser.add_argument('--config', help='Path to configuration file')
     args = parser.parse_args()
 
-    # Setup logging
+    # ===== CONFIGURATION LOADING =====
+    # Load configuration
+    config_manager = ConfigManager()
+
+    # Use custom config file if specified, otherwise default
+    config_file = args.config if args.config else "default_config.json"
+    config = config_manager.load_config(config_file)
+
+    # Validate configuration
+    if not config_manager.validate_config(config):
+        print("Configuration validation failed! Please check your config file.")
+        sys.exit(1)
+
+    # Set encryption key from environment if available
+    encryption_key = os.environ.get('CONFIG_ENCRYPTION_KEY')
+    if encryption_key:
+        config_manager.encryption_key = encryption_key
+    # ===== END CONFIGURATION LOADING =====
+
+    # Setup logging - now using config from loaded configuration
     log_dir = Path("logs")
     log_dir.mkdir(exist_ok=True)
-    setup_logging(log_dir / "app.log")
+
+    # Get log settings from config
+    log_config = config.get('logging', {})
+    log_level = log_config.get('level', 'INFO')
+    log_file = log_config.get('file', 'logs/app.log')
+    max_size_mb = log_config.get('max_size_mb', 10)
+    backup_count = log_config.get('backup_count', 5)
+
+    setup_logging(log_file, log_level)
 
     logger = logging.getLogger(__name__)
     logger.info(f"Starting {APP_NAME} v{APP_VERSION}")
+    logger.info(f"Loaded configuration from: {config_file}")
 
     # Handle service commands
     if args.install_service:
@@ -58,22 +87,25 @@ def main():
         success = WindowsStartupManager.disable_auto_start("AdvancedBiometricApp")
         sys.exit(0 if success else 1)
 
-    # Initialize database
-    db_manager = DatabaseManager()
+    # Initialize database - now using config
+    db_config = config.get('database', {})
+    db_manager = DatabaseManager(db_path=db_config.get('path', 'data/att.db'))
 
-    # Initialize services
-    device_manager = DeviceManager(db_manager)
-    attendance_service = AttendanceService(db_manager, device_manager)
+    # Initialize services - pass config to managers
+    device_manager = DeviceManager(db_manager, config)
+    attendance_service = AttendanceService(db_manager, device_manager, config)
 
     try:
-        # Initialize devices
-        device_manager.initialize_devices()
+        # Initialize devices using config
+        devices_config = config.get('devices', [])
+        device_manager.initialize_devices(devices_config)
 
         # Start live capture
         device_manager.start_live_capture()
 
-        # Start attendance service
-        attendance_service.start()
+        # Start attendance service using sync config
+        sync_config = config.get('sync', {})
+        attendance_service.start(sync_config)
 
         logger.info("All services started successfully")
 

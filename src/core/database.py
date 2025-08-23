@@ -8,8 +8,9 @@ from pathlib import Path
 logger = logging.getLogger(__name__)
 
 class DatabaseManager:
-    def __init__(self, db_path: str = "data/att.db"):
+    def __init__(self, db_path: str = "data/att.db", config: Dict = None):
         self.db_path = db_path
+        self.config = config or {}
         Path(db_path).parent.mkdir(parents=True, exist_ok=True)
         self._init_database()
 

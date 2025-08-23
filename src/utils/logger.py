@@ -4,8 +4,9 @@ import os
 from pathlib import Path
 from logging.handlers import RotatingFileHandler
 
-def setup_logging(log_file: str = "logs/app.log", level: str = "INFO"):
-    """Setup application logging"""
+def setup_logging(log_file: str = "logs/app.log", level: str = "INFO",
+                 max_bytes: int = 10*1024*1024, backup_count: int = 5):
+    """Setup application logging with configurable parameters"""
 
     # Create logs directory if it doesn't exist
     log_path = Path(log_file)
@@ -21,8 +22,8 @@ def setup_logging(log_file: str = "logs/app.log", level: str = "INFO"):
         handlers=[
             RotatingFileHandler(
                 log_file,
-                maxBytes=10*1024*1024,  # 10MB
-                backupCount=5
+                maxBytes=max_bytes,
+                backupCount=backup_count
             ),
             logging.StreamHandler()  # Also log to console
         ]
