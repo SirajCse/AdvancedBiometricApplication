@@ -32,22 +32,15 @@ def main():
     # ===== CONFIGURATION LOADING =====
     # Load configuration
     config_manager = ConfigManager()
+
+    # Use custom config file if specified, otherwise default
     config_file = args.config if args.config else "default_config.json"
     config = config_manager.load_config(config_file)
 
     # Validate configuration
     if not config_manager.validate_config(config):
-        logger.error("Configuration validation failed!")
+        print("Configuration validation failed! Please check your config file.")
         sys.exit(1)
-
-    # Use config for logging setup
-    log_config = config.get('logging', {})
-    setup_logging(
-        log_file=log_config.get('file', 'logs/app.log'),
-        level=log_config.get('level', 'INFO'),
-        max_bytes=log_config.get('max_size_mb', 10) * 1024 * 1024,
-        backup_count=log_config.get('backup_count', 5)
-    )
 
     # Set encryption key from environment if available
     encryption_key = os.environ.get('CONFIG_ENCRYPTION_KEY')
@@ -59,14 +52,14 @@ def main():
     log_dir = Path("logs")
     log_dir.mkdir(exist_ok=True)
 
-    # Get log settings from config
+    # Use config for logging setup - CORRECTED VERSION
     log_config = config.get('logging', {})
-    log_level = log_config.get('level', 'INFO')
-    log_file = log_config.get('file', 'logs/app.log')
-    max_size_mb = log_config.get('max_size_mb', 10)
-    backup_count = log_config.get('backup_count', 5)
-
-    setup_logging(log_file, log_level)
+    setup_logging(
+        log_file=log_config.get('file', 'logs/app.log'),
+        level=log_config.get('level', 'INFO'),
+        max_bytes=log_config.get('max_size_mb', 10) * 1024 * 1024,
+        backup_count=log_config.get('backup_count', 5)
+    )
 
     logger = logging.getLogger(__name__)
     logger.info(f"Starting {APP_NAME} v{APP_VERSION}")
@@ -76,22 +69,22 @@ def main():
     if args.install_service:
         app_path = sys.executable if getattr(sys, 'frozen', False) else __file__
         success = WindowsStartupManager.install_windows_service(
-            "AdvancedBiometricApp", APP_NAME, app_path
+            "AdvancedBiometric", APP_NAME, app_path
         )
         sys.exit(0 if success else 1)
 
     if args.uninstall_service:
-        success = WindowsStartupManager.uninstall_windows_service("AdvancedBiometricApp")
+        success = WindowsStartupManager.uninstall_windows_service("AdvancedBiometric")
         sys.exit(0 if success else 1)
 
     # Handle auto-start commands
     if args.enable_autostart:
         app_path = sys.executable if getattr(sys, 'frozen', False) else __file__
-        success = WindowsStartupManager.enable_auto_start("AdvancedBiometricApp", app_path)
+        success = WindowsStartupManager.enable_auto_start("AdvancedBiometric", app_path)
         sys.exit(0 if success else 1)
 
     if args.disable_autostart:
-        success = WindowsStartupManager.disable_auto_start("AdvancedBiometricApp")
+        success = WindowsStartupManager.disable_auto_start("AdvancedBiometric")
         sys.exit(0 if success else 1)
 
     # Initialize database - now using config

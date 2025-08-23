@@ -67,7 +67,11 @@ def build_with_pyinstaller():
     print("Building with PyInstaller with enhanced security...")
 
     # Get encryption key securely
-    encryption_key = get_secure_encryption_key()
+    encryption_key = os.environ.get('APP_ENCRYPTION_KEY')
+    if not encryption_key:
+        raise ValueError("APP_ENCRYPTION_KEY environment variable not set")
+    if len(encryption_key) < 16:
+        raise ValueError("Encryption key must be at least 16 characters")
 
     pyinstaller_args = [
         "src/main.py",
@@ -79,12 +83,16 @@ def build_with_pyinstaller():
         "--add-data=config;config",
         "--add-data=data;data",
         "--add-data=scripts;scripts",
+        "--add-data=logs;logs",
         "--hidden-import=sqlite3",
         "--hidden-import=requests",
         "--hidden-import=urllib3",
         "--hidden-import=logging.handlers",
-        # Security options - using secure key
-        f"--key={encryption_key}",  # Bytecode encryption with secure key
+        "--runtime-hook=custom_runtime.py",
+        # Protection options - USE SECURE KEY
+        f"--key={encryption_key}",  # ✅ Use environment variable
+        "--upx-dir=.",  # Use UPX if available
+        "--strip",  # Strip symbols
         "--noupx",  # Don't use UPX (can be detected as malware)
     ]
 

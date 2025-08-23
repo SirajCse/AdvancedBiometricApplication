@@ -1,11 +1,11 @@
-# src/utils/logger.py
+# src/utils/logger.py - Updated version
 import logging
 import os
 from pathlib import Path
 from logging.handlers import RotatingFileHandler
 
-def setup_logging(log_file="logs/app.log", level="INFO",
-                 max_bytes=10*1024*1024, backup_count=5):
+def setup_logging(log_file: str = "logs/app.log", level: str = "INFO",
+                 max_bytes: int = 10*1024*1024, backup_count: int = 5):
     """Setup application logging with configurable parameters"""
 
     # Create logs directory if it doesn't exist
