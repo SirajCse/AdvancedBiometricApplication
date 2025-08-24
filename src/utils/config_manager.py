@@ -242,6 +242,35 @@ class ConfigManager:
 
         return decrypted_config
 
+    # In your config manager, add encryption for API keys
+    def _encrypt_sensitive_data(self, config):
+        """Encrypt sensitive data in configuration"""
+        encrypted_config = config.copy()
+
+        # Encrypt API keys and sensitive data
+        if 'server' in config and 'api_key' in config['server']:
+            encrypted_config['server']['api_key'] = self._encrypt_string(
+                config['server']['api_key']
+            )
+
+        return encrypted_config
+
+    def _decrypt_sensitive_data(self, config):
+        """Decrypt sensitive data in configuration"""
+        decrypted_config = config.copy()
+
+        # Decrypt API keys
+        if 'server' in config and 'api_key' in config['server']:
+            try:
+                decrypted_config['server']['api_key'] = self._decrypt_string(
+                    config['server']['api_key']
+                )
+            except:
+                # If decryption fails, keep original
+                pass
+
+        return decrypted_config
+
     def _is_sensitive_key(self, key: str) -> bool:
         """Check if a configuration key contains sensitive data"""
         sensitive_keys = ['api_key', 'apikey', 'password', 'secret', 'token', 'key']

@@ -18,11 +18,35 @@ from core.attendance_service import AttendanceService
 from utils.logger import setup_logging
 from utils.windows_utils import WindowsStartupManager
 from utils.config_manager import ConfigManager
+from utils.license_manager import LicenseManager
 
 APP_NAME = "Advanced Biometric Application"
 APP_VERSION = "2.0"
 
+def fix_pyinstaller_stdout():
+    """Fix stdout/stderr issues in PyInstaller compiled executables"""
+    if getattr(sys, 'frozen', False):
+        # Running as compiled executable
+        try:
+            if sys.stdout is None:
+                sys.stdout = open(os.devnull, 'w')
+            if sys.stderr is None:
+                sys.stderr = open(os.devnull, 'w')
+        except:
+            # Fallback: create simple stdout/stderr
+            class SimpleWriter:
+                def write(self, text):
+                    pass
+                def flush(self):
+                    pass
+            if sys.stdout is None:
+                sys.stdout = SimpleWriter()
+            if sys.stderr is None:
+                sys.stderr = SimpleWriter()
+
 def main():
+    # Fix PyInstaller stdout issues
+    fix_pyinstaller_stdout()
     # Parse command line arguments
     parser = argparse.ArgumentParser(description=APP_NAME)
     parser.add_argument('--minimized', action='store_true', help='Start minimized')
@@ -32,6 +56,23 @@ def main():
     parser.add_argument('--disable-autostart', action='store_true', help='Disable auto-start with Windows')
     parser.add_argument('--config', help='Path to configuration file')
     args = parser.parse_args()
+
+    # Check license first
+    license_manager = LicenseManager()
+    is_valid, message = license_manager.validate_license()
+
+    if not is_valid:
+        print(f"License issue: {message}")
+        print("Please contact support for a valid license key.")
+
+        # For trial version, allow limited functionality
+        if not license_manager.license_data:
+            print("Running in trial mode (30 days)")
+            # Generate trial license
+            license_key = license_manager.generate_license("Trial User", 1, 30)
+            print(f"Your trial license key: {license_key}")
+        else:
+            sys.exit(1)
 
     # ===== CONFIGURATION LOADING =====
     # Load configuration
