@@ -1,300 +1,297 @@
 # Advanced Biometric Application
 
-[![Python](https://img.shields.io/badge/Python-3.7%2B-blue)](https://www.python.org/)
-[![Windows](https://img.shields.io/badge/OS-Windows-lightgrey)]()
-[![License](https://img.shields.io/badge/License-Proprietary-red)]()
-[![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen)]()
-[![Device Connectivity](https://img.shields.io/badge/Device-Connected-green)]()
-[![Service Health](https://img.shields.io/badge/Service-Running-green)]()
+A comprehensive biometric attendance system for private or public institutions using ZKTeco devices. This application provides real-time attendance capture, automatic synchronization with central servers, and Windows service operation.
 
-A professional-grade biometric attendance system connecting **ZKTeco devices** to your server with enhanced security and service integration.
+## 📋 Table of Contents
 
----
+- [Prerequisites](#-prerequisites)
+- [✨ Features](#-features)
+- [🔧 Configuration](#-configuration)
+- [🚀 Initial Setup](#-initial-setup)
+- [🔒 Build Protected Executable](#-build-protected-executable)
+- [⚙️ Configuration Setup](#%EF%B8%8F-configuration-setup)
+- [📦 Installation Options](#-installation-options)
+- [✅ Verification and Testing](#-verification-and-testing)
+- [🏢 Production Deployment Checklist](#-production-deployment-checklist)
+- [🐛 Troubleshooting](#-troubleshooting)
+- [🔄 Maintenance and Updates](#-maintenance-and-updates)
+- [📊 Support and Monitoring](#-support-and-monitoring)
+- [🔐 License Management](#-license-management)
 
-## Table of Contents
+## 🛠 Prerequisites
 
-- [Prerequisites](#prerequisites)
-- [Features](#features)
-- [Configuration](#configuration)
-- [Initial Setup](#initial-setup)
-- [Build Protected Executable](#build-protected-executable)
-- [Configuration Setup](#configuration-setup)
-- [Installation Options](#installation-options)
-- [Verification and Testing](#verification-and-testing)
-- [Production Deployment Checklist](#production-deployment-checklist)
-- [Troubleshooting](#troubleshooting)
-- [Maintenance and Updates](#maintenance-and-updates)
-- [Support and Monitoring](#support-and-monitoring)
+- **Python 3.7+** installed on Windows
+- **Administrator privileges** for service installation
+- **Network access** to biometric devices
+- **ZKTeco biometric devices** properly connected to network
+- **Git** for version control
 
----
+## ✨ Features
 
-## Prerequisites
+- **Real-time attendance capture** from ZKTeco biometric devices
+- **Automatic synchronization** with central server
+- **Windows service installation** for background operation
+- **Comprehensive logging** and error handling
+- **Easy configuration management** with JSON/INI support
+- **Secure executable protection** with bytecode encryption
+- **License key management** for commercial deployment
+- **Multi-device support** with automatic reconnection
+- **Integrity verification** against tampering
 
-1. **Python 3.7+** installed on Windows
-2. **Administrator privileges** for service installation
-3. **Network access** to biometric devices
-4. **ZKTeco devices** properly connected to network
+## 🔧 Configuration
 
----
+### Configuration Files
 
-## Features
+- `config/default_config.json` - Primary configuration (JSON format)
+- `config/app_config.ini` - Alternative configuration (INI format)
 
-- Real-time attendance capture from ZKTeco biometric devices
-- Automatic synchronization with central server
-- Windows service installation for background operation
-- Comprehensive logging and error handling
-- Easy configuration management
+### Key Configuration Sections
 
----
+```json
+{
+  "database": {
+    "path": "data/att.db",
+    "auto_create": true,
+    "encryption": false
+  },
+  "logging": {
+    "level": "INFO",
+    "file": "logs/app.log",
+    "max_size_mb": 10,
+    "backup_count": 5
+  },
+  "devices": [
+    {
+      "ip": "192.168.1.201",
+      "port": 4370,
+      "serial_number": "DEVICE_SERIAL_NUMBER",
+      "name": "Main Entrance Device",
+      "enabled": true,
+      "timeout": 30
+    }
+  ],
+  "server": {
+    "url": "https://your-academy.example.com/",
+    "api_key": "your_api_key_here",
+    "sync_enabled": true,
+    "verify_ssl": true,
+    "timeout": 30
+  }
+}
+```
 
-## Configuration
+## 🚀 Initial Setup
 
-Edit `config/default_config.json` to configure:
-- Device IP addresses and ports
-- Server URL and API settings
-- Sync intervals and retry policies
-- Application behavior
-
-## Initial Setup
-
-<details>
-<summary>Download and Extract Application</summary>
+### 1. Clone and Setup Repository
 
 ```bash
-mkdir C:\AdvancedBiometric
-cd C:\AdvancedBiometric
-````
+git clone https://github.com/SirajCse/AdvancedBiometricApplication.git
+cd AdvancedBiometricApplication
+```
 
-</details>
+### 2. Install Dependencies
 
-<details>
-<summary>Set Encryption Key</summary>
+```bash
+pip install -r requirements.txt
+```
+
+### 3. Create Required Directories
+
+```bash
+mkdir config data logs scripts
+```
+
+## 🔒 Build Protected Executable
+
+### 1. Set Encryption Key
 
 ```cmd
 set APP_ENCRYPTION_KEY=YourSecurePassword123!
 ```
 
-*Must be at least 16 characters.*
-
-</details>
-
----
-
-## Build Protected Executable
-
-<details>
-<summary>Run Secure Build</summary>
+### 2. Build the Application
 
 ```cmd
 python build_protected.py
 ```
 
-</details>
-
-<details>
-<summary>Alternative: Use Batch Installer</summary>
+### 3. Verify Build Success
 
 ```cmd
-install_protected.bat
+dir dist
+# Should show: AdvancedBiometricApplication.exe
 ```
 
-</details>
+### Security Features Applied
 
-<details>
-<summary>Expected Build Output</summary>
+- Bytecode encryption with environment-based keys
+- Runtime integrity checking
+- Anti-debugging protection
+- Secure file permissions
+- Integrity hash verification
 
-```
-BUILD COMPLETED SUCCESSFULLY!
-Executable: dist/AdvancedBiometricApplication.exe
-Integrity Hash: a1b2c3d4e5f6...
-```
+## ⚙️ Configuration Setup
 
-</details>
+### 1. Edit Device Configuration
 
-<details>
-<summary>Secure the Integrity Information</summary>
-
-```cmd
-echo a1b2c3d4e5f6... > C:\secure\app_hash.txt
-icacls C:\secure\app_hash.txt /inheritance:r /grant:r Administrators:(F)
-```
-
-</details>
-
----
-
-## Configuration Setup
-
-<details>
-<summary>Edit Device Configuration</summary>
-
-`config/default_config.json`:
+Update `config/default_config.json` with your actual device information:
 
 ```json
 {
   "devices": [
-    {"ip": "192.168.1.201", "port": 4370, "serial_number": "ZKDevice12345", "name": "Main Entrance Device", "enabled": true}
+    {
+      "ip": "192.168.1.201",
+      "port": 4370,
+      "serial_number": "ZKDevice12345",
+      "name": "Main Entrance Device",
+      "enabled": true
+    }
   ],
-  "server": {"url": "https://your-school-server.com/api/", "api_key": "your_actual_api_key_here", "sync_enabled": true},
-  "sync": {"interval_seconds": 300, "retry_attempts": 3}
+  "server": {
+    "url": "https://your-school-server.com/api/",
+    "api_key": "your_actual_api_key_here",
+    "sync_enabled": true
+  }
 }
 ```
 
-</details>
-
-<details>
-<summary>Optional Environment Variables</summary>
+### 2. Environment Variables (Optional)
 
 ```cmd
 set BIOMETRIC_SERVER_URL=https://your-school-server.com/api/
 set BIOMETRIC_API_KEY=your_actual_api_key_here
 ```
 
-</details>
+## 📦 Installation Options
 
----
-
-## Installation Options
-
-<details>
-<summary>Standard Installation</summary>
+### Option 1: Standard Application Installation
 
 ```cmd
 install.bat
 ```
 
-</details>
-
-<details>
-<summary>Windows Service Installation (Recommended)</summary>
+### Option 2: Windows Service Installation (Recommended)
 
 ```cmd
+# Run as Administrator
 scripts\install_service.bat
 ```
 
-</details>
-
-<details>
-<summary>Manual Service Installation</summary>
+### Option 3: Manual Service Installation
 
 ```cmd
-cd C:\AdvancedBiometric
+# Open Command Prompt as Administrator
+cd AdvancedBiometricApplication
 python src\main.py --install-service
+
+# Verify service installation
 sc query AdvancedBiometric
 ```
 
-</details>
+## ✅ Verification and Testing
 
----
-
-## Verification and Testing
-
-<details>
-<summary>Run Application in Foreground</summary>
+### 1. Test Application Functionality
 
 ```cmd
 scripts\run_app.bat
 ```
 
-</details>
-
-<details>
-<summary>Verify Device Connectivity</summary>
+### 2. Verify Device Connectivity
 
 ```cmd
-python -c "
-from src.biometric.zk_device import ZKDevice
-device = ZKDevice('192.168.1.201', 4370)
-if device.connect(): print('Device connected successfully')
-else: print('Connection failed')
-"
+python test_device.py
 ```
 
-</details>
-
-<details>
-<summary>Test Service Operation</summary>
+### 3. Test Service Operation
 
 ```cmd
+# Start the service
 sc start AdvancedBiometric
+
+# Check service status
 sc query AdvancedBiometric
+
+# View logs
 type logs\app.log
 ```
 
-</details>
-
----
-
-## Production Deployment Checklist
-
-<details>
-<summary>Security Hardening</summary>
+### 4. Test License System
 
 ```cmd
-icacls C:\AdvancedBiometric /inheritance:r /grant:r Administrators:(F) /grant:r SYSTEM:(F) /grant:r Users:(RX)
+# Generate a license
+python generate_license.py
+
+# Check license info
+python generate_license.py info
+```
+
+## 🏢 Production Deployment Checklist
+
+### Security Hardening
+
+```cmd
+# Set secure permissions on all directories
+icacls AdvancedBiometricApplication /inheritance:r /grant:r Administrators:(F)
+
+# Secure configuration files
 attrib +R config\default_config.json
 ```
 
-</details>
-
-<details>
-<summary>Verify Integrity</summary>
+### Integrity Verification
 
 ```cmd
+# Verify executable integrity
 python -c "
-from src.utils.windows_utils import WindowsStartupManager
-import os
-
-expected_hash = os.environ.get('APP_EXPECTED_HASH')
-if WindowsStartupManager.verify_executable_integrity('dist/AdvancedBiometricApplication.exe', expected_hash):
-    print('Integrity verification PASSED')
-else:
-    print('Integrity verification FAILED')
+import hashlib
+expected_hash = 'your_expected_hash_here'
+with open('dist/AdvancedBiometricApplication.exe', 'rb') as f:
+    current_hash = hashlib.sha256(f.read()).hexdigest()
+print('Integrity check:', current_hash == expected_hash)
 "
 ```
 
-</details>
-
-<details>
-<summary>Scheduled Maintenance</summary>
+### Scheduled Tasks for Maintenance
 
 ```cmd
-schtasks /create /tn "BiometricAppLogCleanup" /tr "C:\AdvancedBiometric\scripts\cleanup_logs.bat" /sc daily /st 23:00
+# Create scheduled task for log rotation
+schtasks /create /tn \"BiometricAppLogCleanup\" /tr \"C:\AdvancedBiometricApplication\scripts\cleanup_logs.bat\" /sc daily /st 23:00
 ```
 
-</details>
+## 🐛 Troubleshooting Common Issues
 
----
-
-## Troubleshooting
-
-<details>
-<summary>Device Connection Issues</summary>
+### Device Connection Problems
 
 ```cmd
+# Check device network connectivity
 ping 192.168.1.201
+
+# Test device port
 telnet 192.168.1.201 4370
-netsh advfirewall firewall show rule name=all | findstr "4370"
+
+# Check firewall settings
+netsh advfirewall firewall show rule name=all | findstr \"4370\"
 ```
 
-</details>
-
-<details>
-<summary>Service Installation Issues</summary>
+### Service Installation Issues
 
 ```cmd
+# Check if Python is in system PATH
 python --version
+
+# Verify administrator privileges
 net session >nul 2>&1 && echo Administrator || echo Not administrator
+
+# View detailed error information
 python src\main.py --install-service --debug
 ```
 
-</details>
-
-<details>
-<summary>Database Issues</summary>
+### Database Issues
 
 ```cmd
+# Check database file permissions
 icacls data\att.db
+
+# Verify database integrity
 python -c "
 import sqlite3
 conn = sqlite3.connect('data/att.db')
@@ -303,14 +300,9 @@ conn.close()
 "
 ```
 
-</details>
+## 🔄 Maintenance and Updates
 
----
-
-## Maintenance and Updates
-
-<details>
-<summary>Regular Maintenance Tasks</summary>
+### Regular Maintenance Tasks
 
 ```cmd
 # Backup database
@@ -318,61 +310,124 @@ xcopy data\att.db backup\att.db_%DATE% /Y
 
 # Rotate logs
 python -c "
+import logging
 from logging.handlers import RotatingFileHandler
 handler = RotatingFileHandler('logs/app.log', maxBytes=10*1024*1024, backupCount=5)
 handler.doRollover()
 "
 
 # Check service health
-sc query AdvancedBiometric | findstr "STATE"
+sc query AdvancedBiometric | findstr \"STATE\"
 ```
 
-</details>
-
-<details>
-<summary>Update Procedure</summary>
+### Update Procedure
 
 ```cmd
+# Stop service
 sc stop AdvancedBiometric
-xcopy C:\AdvancedBiometric C:\AdvancedBiometric_backup_%DATE% /E /I
-xcopy \\server\new_version\* C:\AdvancedBiometric /E /Y
+
+# Backup current installation
+xcopy C:\AdvancedBiometricApplication C:\AdvancedBiometricApplication_backup_%DATE% /E /I
+
+# Deploy new version
+xcopy \\server\new_version\* C:\AdvancedBiometricApplication /E /Y
+
+# Update integrity hash
 set APP_EXPECTED_HASH=new_hash_value_here
+
+# Start service
 sc start AdvancedBiometric
 ```
 
-</details>
+## 📊 Support and Monitoring
 
----
+### Monitoring Script
 
-## Support and Monitoring
+Create `health_check.bat`:
 
-<details>
-<summary>Monitoring Script</summary>
-
-```cmd
+```batch
 @echo off
 python -c "
 import requests
 import socket
-try: print('All systems operational')
-except Exception as e: print('Error:', e)
+try:
+    # Check service status
+    # Check device connectivity
+    # Check database health
+    print('All systems operational')
+except Exception as e:
+    print('Error:', e)
 "
 ```
 
-</details>
-
-<details>
-<summary>Log Monitoring</summary>
+### Log Monitoring
 
 ```cmd
+# Tail application logs
 powershell "Get-Content logs\app.log -Wait -Tail 50"
 ```
 
-</details>
+## 🔐 License Management
+
+### Generate License Keys
+
+```cmd
+python generate_license.py
+```
+
+Follow the interactive prompts to generate license keys for customers.
+
+### License File Structure
+
+Licenses are stored in `config/license.json`:
+
+```json
+{
+  "license_key": "A1B2C3D4E5F6G7H8I9J0K1L2M3N4O5P6",
+  "customer_name": "ABC Corporation",
+  "device_count": 5,
+  "issued_date": "2024-01-01T00:00:00.000000",
+  "expiry_date": "2025-01-01T00:00:00.000000",
+  "activated": true,
+  "activation_date": "2024-01-01T00:00:00.000000"
+}
+```
+
+### Environment Variables for License Security
+
+```cmd
+# Set secure salt for license generation
+set LICENSE_SALT=YourSuperSecureSaltValue123!
+```
+
+## 📞 Support
+
+For technical support and documentation:
+- **Website**: https://www.bitdreamit.com
+- **Email**: info@bitdreamit.com
+- **GitHub Issues**: [Create Issue](https://github.com/SirajCse/AdvancedBiometricApplication/issues)
+
+## 📄 License
+
+This software requires a valid license key for production use. Generate trial licenses using the included license manager or contact support for commercial licenses.
 
 ---
 
+**Note**: This application is designed for private or public institutions and requires proper ZKTeco biometric devices for full functionality. Always test in a development environment before production deployment.
+```
 
-## Support
+## 📋 **Files to Add to Your Repository:**
 
-For support and documentation, visit https://www.bitdreamit.com
+1. **`test_device.py`** - Device testing script
+2. **`generate_license.py`** - License generation script  
+3. **`src/utils/license_manager.py`** - License management module
+4. **`health_check.bat`** - System monitoring script
+
+## 🚀 **Next Steps:**
+
+1. **Add these new files** to your repository
+2. **Update the README.md** with this comprehensive version
+3. **Test the complete workflow** from installation to license generation
+4. **Create release versions** with proper version tagging
+
+This README provides complete documentation for users, administrators, and developers! 📚
