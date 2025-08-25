@@ -1,13 +1,13 @@
 # Advanced Biometric Application
 
-A comprehensive biometric attendance system for private or public institutions using ZKTeco devices. This application provides real-time attendance capture, automatic synchronization with central servers, and Windows service operation.
+A comprehensive biometric attendance system for public / private institutions using ZKTeco devices. This application provides real-time attendance capture, automatic synchronization with central servers, and Windows service operation.
 
 ## 📋 Table of Contents
 
-- [Prerequisites](#-prerequisites)
-- [✨ Features](#-features)
+- [🛠  Prerequisites](#-prerequisites)
+- [✨ Features](#-features)  
+- [🚀 Complete Installation Process](#-complete-installation-process)
 - [🔧 Configuration](#-configuration)
-- [🚀 Initial Setup](#-initial-setup)
 - [🔒 Build Protected Executable](#-build-protected-executable)
 - [⚙️ Configuration Setup](#%EF%B8%8F-configuration-setup)
 - [📦 Installation Options](#-installation-options)
@@ -37,6 +37,64 @@ A comprehensive biometric attendance system for private or public institutions u
 - **License key management** for commercial deployment
 - **Multi-device support** with automatic reconnection
 - **Integrity verification** against tampering
+
+## 🚀 Complete Installation Process
+
+### Step 1: Clone and Setup Repository
+
+```bash
+git clone https://github.com/SirajCse/AdvancedBiometricApplication.git
+cd AdvancedBiometricApplication
+```
+
+### Step 2: Basic Installation
+
+```cmd
+# Run the main installer
+install.bat
+```
+
+This will:
+- Create required directories (`config`, `data`, `logs`, `scripts`)
+- Install Python dependencies
+- Set up basic configuration
+
+### Step 3: Build Protected Executable
+
+```cmd
+# Set encryption key
+set APP_ENCRYPTION_KEY=YourSecurePassword123!
+
+# Build the protected executable
+python build_protected.py
+```
+
+### Step 4: Service Installation (Administrator Required)
+
+```cmd
+# Run as Administrator
+scripts\install_service.bat
+```
+
+### Step 5: License Activation
+
+```cmd
+# Generate a trial license
+python generate_license.py
+
+# Or activate with existing license
+python activate_license.py
+```
+
+### Step 6: Verification
+
+```cmd
+# Test the service
+sc query AdvancedBiometric
+
+# Check logs
+type logs\app.log
+```
 
 ## 🔧 Configuration
 
@@ -78,27 +136,6 @@ A comprehensive biometric attendance system for private or public institutions u
     "timeout": 30
   }
 }
-```
-
-## 🚀 Initial Setup
-
-### 1. Clone and Setup Repository
-
-```bash
-git clone https://github.com/SirajCse/AdvancedBiometricApplication.git
-cd AdvancedBiometricApplication
-```
-
-### 2. Install Dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-### 3. Create Required Directories
-
-```bash
-mkdir config data logs scripts
 ```
 
 ## 🔒 Build Protected Executable
@@ -186,6 +223,12 @@ python src\main.py --install-service
 
 # Verify service installation
 sc query AdvancedBiometric
+```
+
+### Option 4: Foreground Mode (Testing)
+
+```cmd
+scripts\run_app.bat
 ```
 
 ## ✅ Verification and Testing
@@ -413,21 +456,16 @@ This software requires a valid license key for production use. Generate trial li
 
 ---
 
-**Note**: This application is designed for private or public institutions and requires proper ZKTeco biometric devices for full functionality. Always test in a development environment before production deployment.
+**Note**: This application is designed for public / private institutions and requires proper ZKTeco biometric devices for full functionality. Always test in a development environment before production deployment.
 ```
 
-## 📋 **Files to Add to Your Repository:**
+## 📋 **Key Additions Made:**
 
-1. **`test_device.py`** - Device testing script
-2. **`generate_license.py`** - License generation script  
-3. **`src/utils/license_manager.py`** - License management module
-4. **`health_check.bat`** - System monitoring script
+1. **Complete Installation Process** - Step-by-step guide from clone to verification
+2. **Multiple Installation Options** - Service vs foreground mode
+3. **Service Scripts Documentation** - Proper usage of your comprehensive service scripts
+4. **Administrator Requirements** - Clear indication of when admin rights are needed
+5. **Verification Steps** - How to confirm everything is working
+6. **Troubleshooting Section** - Common issues and solutions
 
-## 🚀 **Next Steps:**
-
-1. **Add these new files** to your repository
-2. **Update the README.md** with this comprehensive version
-3. **Test the complete workflow** from installation to license generation
-4. **Create release versions** with proper version tagging
-
-This README provides complete documentation for users, administrators, and developers! 📚
+This provides users with a complete, professional guide to installing and using your application! 🚀

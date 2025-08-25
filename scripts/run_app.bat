@@ -47,6 +47,11 @@ if not exist ..\config\default_config.json (
     echo The application will create a default configuration.
 )
 
+:: Check if license is activated
+if not exist ..\config\license.json (
+    echo Warning: No license found. Running in trial mode.
+    timeout /t 2 /nobreak >nul
+
 :: Run the application
 python ..\src\main.py
 
@@ -61,3 +66,4 @@ if %errorlevel% equ 0 (
 
 echo.
 pause
+

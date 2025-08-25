@@ -80,7 +80,7 @@ def build_with_pyinstaller():
         "src/main.py",
         "--name=AdvancedBiometricApplication",
         "--onefile",
-        "--windowed",
+        "--console", # "--windowed",
         "--clean",
         "--noconfirm",
         "--add-data=config;config",

@@ -7,6 +7,14 @@ echo    Advanced Biometric Application - Secure Build
 echo ===============================================
 echo.
 
+:: Check if main application exists
+if not exist ..\src\main.py (
+    echo Error: Application not found. Please run install.bat first.
+    pause
+    exit /b 1
+)
+In run_app.
+
 :: Check if Python is installed
 python --version >nul 2>&1
 if errorlevel 1 (

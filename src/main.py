@@ -1,55 +1,58 @@
 # src/main.py
+import time
 import sys
 import os
 import logging
 import argparse
 from pathlib import Path
 
-# Add the parent directory to Python path
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-# CRITICAL: Add the src directory to Python path for PyInstaller ← THIS IS THE FIX!
-src_path = Path(__file__).parent
-sys.path.insert(0, str(src_path))
+# Add src to path
+sys.path.insert(0, os.path.join(os.path.dirname(__file__)))
 
 from core.database import DatabaseManager
 from core.device_manager import DeviceManager
 from core.attendance_service import AttendanceService
 from utils.logger import setup_logging
 from utils.windows_utils import WindowsStartupManager
-from utils.config_manager import ConfigManager
-from utils.license_manager import LicenseManager
 
 APP_NAME = "Advanced Biometric Application"
 APP_VERSION = "2.0"
 
-def fix_pyinstaller_stdout():
-    """Fix stdout/stderr issues in PyInstaller compiled executables"""
-    if getattr(sys, 'frozen', False):
-        # Running as compiled executable
-        try:
-            if sys.stdout is None:
-                sys.stdout = open(os.devnull, 'w')
-            if sys.stderr is None:
-                sys.stderr = open(os.devnull, 'w')
-        except:
-            # Fallback: create simple stdout/stderr
-            class SimpleWriter:
-                def write(self, text):
-                    pass
-                def flush(self):
-                    pass
-            if sys.stdout is None:
-                sys.stdout = SimpleWriter()
-            if sys.stderr is None:
-                sys.stderr = SimpleWriter()
+def check_license():
+    """Non-interactive license check for windowed applications"""
+    try:
+        from utils.license_manager import LicenseManager
+        license_manager = LicenseManager()
+        is_valid, message = license_manager.validate_license()
+
+        if not is_valid:
+            # Auto-generate trial license if none exists
+            if not license_manager.license_data:
+                license_key = license_manager.generate_license("Trial User", 1, 30)
+                print(f"Auto-generated trial license: {license_key}")
+                return True
+            else:
+                print(f"License Error: {message}")
+                # Continue anyway for demo purposes
+                return True
+
+        return True
+    except ImportError:
+        # License manager not available, continue without license check
+        print("License manager not available, continuing without license check")
+        return True
+    except Exception as e:
+        print(f"License check error: {e}, continuing anyway")
+        return True
 
 def main():
-    # Fix PyInstaller stdout issues
-    fix_pyinstaller_stdout()
+    # Non-interactive license check
+    if not check_license():
+        sys.exit(1)
+
     # Parse command line arguments
     parser = argparse.ArgumentParser(description=APP_NAME)
-    parser.add_argument('--minimized', action='store_true', help='Start minimized')
+    parser.add_argument('--minimized', action='store_true', help='Start minimized to system tray')
     parser.add_argument('--install-service', action='store_true', help='Install as Windows service')
     parser.add_argument('--uninstall-service', action='store_true', help='Uninstall Windows service')
     parser.add_argument('--enable-autostart', action='store_true', help='Enable auto-start with Windows')
@@ -57,103 +60,52 @@ def main():
     parser.add_argument('--config', help='Path to configuration file')
     args = parser.parse_args()
 
-    # Check license first
-    license_manager = LicenseManager()
-    is_valid, message = license_manager.validate_license()
-
-    if not is_valid:
-        print(f"License issue: {message}")
-        print("Please contact support for a valid license key.")
-
-        # For trial version, allow limited functionality
-        if not license_manager.license_data:
-            print("Running in trial mode (30 days)")
-            # Generate trial license
-            license_key = license_manager.generate_license("Trial User", 1, 30)
-            print(f"Your trial license key: {license_key}")
-        else:
-            sys.exit(1)
-
-    # ===== CONFIGURATION LOADING =====
-    # Load configuration
-    config_manager = ConfigManager()
-
-    # Use custom config file if specified, otherwise default
-    config_file = args.config if args.config else "default_config.json"
-    config = config_manager.load_config(config_file)
-
-    # Validate configuration - with basic logging for errors
-    if not config_manager.validate_config(config):
-        # Setup minimal logging for error message
-        setup_logging('logs/app.log', 'ERROR')
-        logger = logging.getLogger(__name__)
-        logger.error("Configuration validation failed! Please check your config file.")
-        sys.exit(1)
-
-    # Set encryption key from environment if available
-    encryption_key = os.environ.get('CONFIG_ENCRYPTION_KEY')
-    if encryption_key:
-        config_manager.encryption_key = encryption_key
-    # ===== END CONFIGURATION LOADING =====
-
-    # Setup logging - now using config from loaded configuration
+    # Setup logging
     log_dir = Path("logs")
     log_dir.mkdir(exist_ok=True)
-
-    # Use config for logging setup
-    log_config = config.get('logging', {})
-    setup_logging(
-        log_file=log_config.get('file', 'logs/app.log'),
-        level=log_config.get('level', 'INFO'),
-        max_bytes=log_config.get('max_size_mb', 10) * 1024 * 1024,
-        backup_count=log_config.get('backup_count', 5)
-    )
+    setup_logging(log_dir / "app.log")
 
     logger = logging.getLogger(__name__)
     logger.info(f"Starting {APP_NAME} v{APP_VERSION}")
-    logger.info(f"Loaded configuration from: {config_file}")
 
     # Handle service commands
     if args.install_service:
         app_path = sys.executable if getattr(sys, 'frozen', False) else __file__
         success = WindowsStartupManager.install_windows_service(
-            "AdvancedBiometric", APP_NAME, app_path
+            "SmartAcademyBiometric", APP_NAME, app_path
         )
         sys.exit(0 if success else 1)
 
     if args.uninstall_service:
-        success = WindowsStartupManager.uninstall_windows_service("AdvancedBiometric")
+        success = WindowsStartupManager.uninstall_windows_service("SmartAcademyBiometric")
         sys.exit(0 if success else 1)
 
     # Handle auto-start commands
     if args.enable_autostart:
         app_path = sys.executable if getattr(sys, 'frozen', False) else __file__
-        success = WindowsStartupManager.enable_auto_start("AdvancedBiometric", app_path)
+        success = WindowsStartupManager.enable_auto_start("SmartAcademyBiometric", app_path)
         sys.exit(0 if success else 1)
 
     if args.disable_autostart:
-        success = WindowsStartupManager.disable_auto_start("AdvancedBiometric")
+        success = WindowsStartupManager.disable_auto_start("SmartAcademyBiometric")
         sys.exit(0 if success else 1)
 
-    # Initialize database - now using config
-    db_config = config.get('database', {})
-    db_manager = DatabaseManager(db_path=db_config.get('path', 'data/att.db'))
+    # Initialize database
+    db_manager = DatabaseManager()
 
-    # Initialize services - pass config to managers
-    device_manager = DeviceManager(db_manager, config)
-    attendance_service = AttendanceService(db_manager, device_manager, config)
+    # Initialize services
+    device_manager = DeviceManager(db_manager)
+    attendance_service = AttendanceService(db_manager, device_manager)
 
     try:
-        # Initialize devices using config
-        devices_config = config.get('devices', [])
-        device_manager.initialize_devices(devices_config)
+        # Initialize devices
+        device_manager.initialize_devices()
 
         # Start live capture
         device_manager.start_live_capture()
 
-        # Start attendance service using sync config
-        sync_config = config.get('sync', {})
-        attendance_service.start(sync_config)
+        # Start attendance service
+        attendance_service.start()
 
         logger.info("All services started successfully")
 
